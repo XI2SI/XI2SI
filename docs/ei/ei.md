@@ -8,4 +8,4 @@
 
 ## Evolutionary Strategy
 
-- [CMAES](https://www.cmaes.com)
+- [CMAES](https://www.cmaes.org)
