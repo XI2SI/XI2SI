@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>XI2SI</title>
+    <!-- <link rel="icon" href="_media/favicon.ico" /> -->
+
+    <meta name="author" content="XI2SI" />
+    <meta name="keywords" content="Super Intelligence" />
+    <meta name="description" content="X-Intelligence to Super Intelligence." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+
+    <!-- Docsify themes -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/core.min.css" />
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@5/dist/themes/addons/vue.min.css" />
+
+    <!-- MathJax -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          displayMath: [['$$', '$$']],
+          tags: 'ams'
+        },
+      };
+    </script>
+
+    <!-- Markmap; Markdown-->
+    <style>
+      :root {
+        --content-max-width: 80%;
+      }
+      .markmap {
+        width: 100%;
+        height: 500px;
+      }
+      .markdown-section pre[data-lang] {
+        max-height: 200px;
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+    </style>
+
+  </head>
+  <body class="sidebar-chevron-right">
+    <!-- Loading dialog -->
+    <div id="app">Please wait...</div>
+
+    <script>
+      window.$docsify = {
+        // Set name and repository link
+        name: "X-Intelligence to Super Intelligence",
+        nameLink: {
+          "/": "#/",
+        },
+        repo: "https://github.com/XI2SI/XI2SI",
+        alias: {
+          '/.*/_sidebar.md': '/_sidebar.md',
+          '/.*/_navbar.md': '/_navbar.md',
+        },
+
+        // Load _coverpage.md
+        coverpage: true,
+        // onlyCover: true,
+
+        // Load _navbar.md
+        loadNavbar: true,
+        hideNavbar: false,
+        mergeNavbar: true,
+        // topMargin: 90,
+
+        // Load _sidebar.md
+        loadSidebar: true,
+        hideSidebar: false,
+
+        // Set max level
+        maxLevel: 2,
+        subMaxLevel: 1,
+
+        //
+        auto2top: true,
+
+        // The default value is false
+        executeScript: true,
+
+        // routerMode: 'history',
+
+        plugins: [
+          // === Load raw HTML files as page content ===
+          function (hook, vm) {
+            hook.beforeEach(function (content) {
+              if (vm.route.file.endsWith(".html")) {
+                return fetch(vm.route.file)
+                  .then((res) => res.text())
+                  .catch(() => "Failed to load HTML");
+              }
+              return content;
+            });
+          },
+
+          // === Read timestamps from _updated.json and inject a banner ===
+          function (hook, vm) {
+            // Load the JSON only once (cache the promise across page navigations)
+            let mapPromise = null;
+            const loadMap = () => {
+              if (!mapPromise) {
+                mapPromise = fetch("_updated.json")
+                  .then((r) => (r.ok ? r.json() : {}))
+                  .catch(() => ({}));
+              }
+              return mapPromise;
+            };
+
+            hook.afterEach(function (html, next) {
+              loadMap().then((map) => {
+                // vm.route.file is the current markdown file, e.g. "README.md"
+                const file = vm.route.file;
+                const ts = map[file];
+
+                // No timestamp for this file — render as-is
+                if (!ts) return next(html);
+
+                // Format the ISO timestamp as "HH:MM DD/MM/YYYY"
+                const d = new Date(ts);
+                const pad = (n) => String(n).padStart(2, "0");
+                const formatted =
+                  `${pad(d.getHours())}:${pad(d.getMinutes())} ` +
+                  `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+                // Build the "Last Modified" banner (right-aligned, gray, small)
+                const banner =
+                  `<div style="color:gray;font-size:14px;text-align:right">` +
+                  `Last Modified: ${formatted}</div>`;
+
+                // Prepend the banner to the rendered HTML (same effect as whereToPlace: "top")
+                next(banner + html);
+              });
+            });
+          },
+        ],
+
+        // Markdown
+
+        // Search
+
+        // LaTex
+        latex: {
+          inlineMath: [
+            ["$", "$"],
+            // ["\\(", "\\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            // ["\\[", "\\]"]
+          ],
+          customOptions: {},
+        },
+
+        // Alerts
+        "flexible-alerts": {
+          style: "flat", // callout
+        },
+
+        // Count
+        count: {
+          countable: true,
+          fontsize: "0.9em",
+          color: "rgb(90,90,90)",
+          language: "english",
+        },
+
+        // Vue
+        vueGlobalOptions: {
+          methods: {
+            diffDate(inputDate) {
+              // day/month/year
+              const inputDateParts = inputDate.split("-");
+              const targetDate = new Date(
+                inputDateParts[0],
+                inputDateParts[1] - 1,
+                inputDateParts[2],
+              );
+
+              const today = new Date();
+
+              // targetDate.setHours(0, 0, 0, 0);
+              // today.setHours(0, 0, 0, 0);
+
+              const diffDate = today.getTime() - targetDate.getTime();
+              const daysDiffDate = Math.floor(diffDate / (1000 * 60 * 60 * 24));
+
+              // Expired: The deadline has passed.
+
+              if (inputDate == "") {
+                return "";
+              } else {
+                if (daysDiffDate < 0) {
+                  return -daysDiffDate;
+                } else {
+                  return "Expired";
+                }
+              }
+            },
+          },
+        },
+
+        // Mermaid
+        mermaidConfig: {
+          querySelector: ".mermaid",
+        },
+
+      }
+    </script>
+
+    <!-- Docsify -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@5/dist/docsify.min.js"></script>
+
+    <!-- Search -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@5/dist/plugins/search.min.js"></script>
+
+    <!-- Emoji -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@5/dist/plugins/emoji.min.js"></script>
+
+    <!-- Zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@5/dist/plugins/zoom-image.min.js"></script>
+
+    <!-- External Script -->
+    <script src="//cdn.jsdelivr.net/npm/docsify@5/dist/plugins/external-script.min.js"></script>
+
+    <!-- --------- --------- --------- --------- --------- --------- --------- --------- --------- --------- -->
+    <!-- Plugins -->
+    <!-- https://docsify.js.org/#/awesome?id=plugins -->
+
+    <!-- LaTex -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify-latex@0"></script>
+
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+
+    <!-- Code: Code render-->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-docker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-git.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-jsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-php.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-rust.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-swift.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+    <!-- Code: Copy to clipboard-->
+    <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@3/dist/docsify-copy-code.min.js"></script>
+
+    <!-- Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify-plugin-flexible-alerts@1/dist/docsify-plugin-flexible-alerts.min.js"></script>
+
+    <!-- Count -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify-count@1/dist/countable.min.js"></script>
+
+    <!-- Pagination -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@latest/dist/docsify-pagination.min.js"></script>
+
+    <!-- Vue 3.x -->
+    <!-- Production -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.runtime.global.prod.js"></script> -->
+    <!-- Development -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.runtime.global.js"></script> -->
+
+    <!-- Markmap -->
+    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-markmap.js@1.0.0/docsify-markmap.min.js"></script>
+
+    <!-- Mermaid -->
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@12/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true });
+      window.mermaid = mermaid;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+
+  </body>
+</html>
