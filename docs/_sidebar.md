@@ -4,4 +4,7 @@
 - [Machine Intelligence](mi/mi.md)
 - [Swarm Intelligence](si2/si2.md)
 - [Evolutionary Intelligence](ei/ei.md)
+- [Artificial Immune Systems](ais/ais.md)
 - [Computational Intelligence](ci/ci.md)
+- [Machine Learning](ml/ml.md)
+- [Deep Learning](dl/dl.md)
